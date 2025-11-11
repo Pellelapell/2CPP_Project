@@ -2,13 +2,24 @@
 #include <vector>
 #include <algorithm>
 #include <string>
+#include <cctype>
 #include "Player.hpp"
 
 int getNumPlayers()
 {
-    std::cout << "Entre le nombre de joueurs" << std::endl;
     int numPlayers;
-    std::cin >> numPlayers;
+    int isDigit = 0;
+
+    while (!isDigit)
+    {
+        std::cout << "Entre le nombre de joueurs" << std::endl;
+        std::cin >> numPlayers;
+
+        if (std::isdigit(numPlayers))
+            isDigit = 1;
+        else
+            std::cout << "Invalid integer" << std::endl;
+    }
     return numPlayers;
 }
 
