@@ -13,6 +13,10 @@ Game::Game(std::vector<class Player> players, int numPlayers)
         this->size = 20;
     else
         this->size = 30;
+    
+    this->board = Board(this->size);
+    this->board.displayBoard();
+    initializeTiles();
 }
 
 Game::~Game() {}
@@ -29,14 +33,6 @@ int Game::getSize()
 
 void Game::initializeTiles()
 {
-    // Cette fonction doit :
-    // - init le vector de tiles de la classe Game
-    // - melanger les tiles ( donc random )
-    // - mettre  le nombre demande de tiles (10.67)
-
-    // remplis un vector avec toutes les tiles possibles
-    // puis melange ce vector
-    // puis prend le nombre de tiles necessaire pour la partie
     std::vector<std::vector<std::string>> tiles =
         {
             {"100", "111"},
@@ -144,13 +140,4 @@ void Game::initializeTiles()
     double ratio = 10.67;
     tilesToPick = static_cast<int>(std::ceil(numPlayers * ratio));
     tiles.resize(tilesToPick);
-    for (size_t i = 0; i < tiles.size(); ++i)
-    {
-        std::cout << "Tile #" << i << ":\n";
-        for (const auto &row : tiles[i])
-        {
-            std::cout << row << '\n';
-        }
-        std::cout << '\n';
-    }
 }

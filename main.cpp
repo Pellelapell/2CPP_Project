@@ -68,6 +68,5 @@ int main()
     int numPlayers = getNumPlayers();
     std::vector<Player> playerList = createPlayerList(numPlayers);
     Game game(playerList, numPlayers);
-    game.initializeTiles();
     return 0;
 }

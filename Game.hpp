@@ -2,13 +2,15 @@
 #include <iostream>
 #include <vector>
 #include "Player.hpp"
+#include "Board.hpp"
 
 class Game
 {
     private:
         std::vector<class Player> players;
-        int size;
         std::vector<std::string> tiles;
+        int size;
+        Board board();
     
     public:
         Game(std::vector<class Player> players, int numPlayers);
