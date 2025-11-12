@@ -10,7 +10,7 @@ class Game
         std::vector<class Player> players;
         std::vector<std::string> tiles;
         int size;
-        Board board();
+        Board board;
     
     public:
         Game(std::vector<class Player> players, int numPlayers);

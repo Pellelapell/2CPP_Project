@@ -2,10 +2,12 @@
 
 Board::Board() : size(0), grid() {}
 
-Board::Board(int size) : grid(size * size) {}
+Board::Board(int size) : size(size), grid(size * size) {
+}
 
 void Board::displayBoard()
 {
+    std::cout << "Board Size: " << size << "x" << size << std::endl;
     for (int i = 0; i < size; ++i)
     {
         for (int j = 0; j < size; ++j)

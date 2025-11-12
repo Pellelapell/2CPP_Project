@@ -5,19 +5,13 @@
 #include <string>
 #include <iostream>
 
-Game::Game(std::vector<class Player> players, int numPlayers)
-{
-    this->players = players;
-
-    if (numPlayers > 4)
-        this->size = 20;
-    else
-        this->size = 30;
-    
-    this->board = Board(this->size);
-    this->board.displayBoard();
-    initializeTiles();
-}
+ Game::Game(std::vector<class Player> players, int numPlayers) :
+    players(players), 
+    size(numPlayers < 5 ? 20 : 30), 
+    board(size) {
+        board.displayBoard();
+        initializeTiles();
+    }
 
 Game::~Game() {}
 
