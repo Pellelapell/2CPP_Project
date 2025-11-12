@@ -4,6 +4,9 @@
 
 struct Cell {
     int used = -1;
+    int owner = -1;
+    std::string color = "\033[37m";
+    std::string symbol = ".";
 };
 
 class Board

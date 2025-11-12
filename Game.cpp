@@ -161,21 +161,6 @@ void Game::initializeTiles()
 
 void Game::runGame()
 {
-    // Game loop implementation goes here
-
-    // doit iterer sur les 9 rounds
-    // et pour chaque round, iterer sur chaque joueur
-
-    // sur chaque tour de joueur :
-    // afficher le board
-    // afficher les tiles disponibles
-    // prompt le joueur d'une rep (ex: si il prend le tile OU si il veut trade)
-    // si trade, gerer le trade
-    // si pick tile, demander au joueur ou il veut poser le tile
-    // verifier si le move est valide
-    // si non, dire que le move n'est pas valide,
-    // si oui, poser le tile sur le board
-    // passer au joueur suivant
 
     for (int round = 1; round <= 9; ++round)
     {
@@ -278,10 +263,8 @@ void Game::runGame()
                     {
                         std::cout << "Invalid action. Please enter F, R, or P." << std::endl;
                     }
+
                 }
-                // F pour flip
-                // R pour rotate
-                // P pour place
 
                 while (true)
                 {

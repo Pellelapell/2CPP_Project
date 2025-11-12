@@ -23,9 +23,9 @@ void Board::displayBoard()
         {
             const auto &c = at(i, j);
             if (c.used == -1)
-                std::cout << ". ";
+                std::cout << c.color << c.symbol << ' ';
             else
-                std::cout << c.used << ' ';
+                std::cout << c.color << c.symbol << ' ';
         }
         std::cout << std::endl;
     }
