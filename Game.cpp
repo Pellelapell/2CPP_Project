@@ -212,6 +212,7 @@ void Game::runGame()
                         for (int i = 0; i < tradeChoice; i++)
                         {
                             tiles.push_back(tiles[i]);
+                            tiles.erase(tiles.begin());
                         }
                     }
                     else
