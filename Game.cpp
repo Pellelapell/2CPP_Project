@@ -14,6 +14,27 @@ Game::Game(std::vector<class Player> players, int numPlayers) : players(players)
     currentRound = 1;
 }
 
+std::vector<std::string> rotateTile90Clockwise(const std::vector<std::string> &tile)
+{
+    if (tile.empty())
+        return {};
+
+    size_t rows = tile.size();
+    size_t cols = tile[0].size();
+
+    std::vector<std::string> rotated(cols, std::string(rows, ' '));
+
+    for (size_t i = 0; i < rows; ++i)
+    {
+        for (size_t j = 0; j < cols; ++j)
+        {
+            rotated[j][rows - 1 - i] = tile[i][j];
+        }
+    }
+
+    return rotated;
+}
+
 Game::~Game() {}
 
 std::vector<class Player> Game::getPlayers()
@@ -221,6 +242,47 @@ void Game::runGame()
                 {
                     std::cout << "Invalid choice. Skipping turn." << std::endl;
                 }
+                while (true)
+                {
+                    std::cout << "Do you want to (F)lip, (R)otate, or (P)lace the tile? Enter F, R, or P: ";
+                    char action;
+                    std::cin >> action;
+                    if (action == 'F' || action == 'f')
+                    {
+                        std::reverse(tiles[0].begin(), tiles[0].end());
+                        for (auto &line : tiles[0])
+                        {
+                            std::reverse(line.begin(), line.end());
+                        }
+                        for (const std::string &line : tiles[0])
+                        {
+                            std::cout << line << std::endl;
+                        }
+                    }
+                    else if (action == 'R' || action == 'r')
+                    {
+                        std::cout << "You chose to rotate the tile." << std::endl;
+                        auto &tile = tiles[0];
+                        tile = rotateTile90Clockwise(tile);
+                        for (const std::string &line : tiles[0])
+                        {
+                            std::cout << line << std::endl;
+                        }
+                    }
+                    else if (action == 'P' || action == 'p')
+                    {
+                        std::cout << "You chose to place the tile." << std::endl;
+                        break;
+                    }
+                    else
+                    {
+                        std::cout << "Invalid action. Please enter F, R, or P." << std::endl;
+                    }
+                }
+                // F pour flip
+                // R pour rotate
+                // P pour place
+
                 while (true)
                 {
                     std::cout << "Where would you like to place the tile? (Enter row and column, e.g., AB): ";
