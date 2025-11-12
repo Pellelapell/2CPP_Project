@@ -6,6 +6,7 @@ class Player
 private:
     std::string playerName;
     std::string playerColor;
+    int exchangesCoupon;
 
 public:
     void setPlayerName(std::string name);

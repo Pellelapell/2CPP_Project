@@ -8,8 +8,9 @@ class Game
 {
     private:
         std::vector<class Player> players;
-        std::vector<std::string> tiles;
+        std::vector<std::vector<std::string>> tiles;
         int size;
+        int currentRound;
         Board board;
     
     public:

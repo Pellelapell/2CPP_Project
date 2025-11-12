@@ -6,6 +6,7 @@
 void Player::setPlayerName(std::string name)
 {
     this->playerName = name;
+    exchangesCoupon = 1;
 }
 
 void Player::setPlayerColor(std::string color)
@@ -20,16 +21,14 @@ void Player::setPlayerColor(std::string color)
         {"Blanc", "\033[37m"},
         {"Violet", "\033[35m"},
         {"Orange", "\033[91m"},
-        {"Rose", "\033[95m"}
-    };
-        std::string code = color;
-        std::transform(code.begin(), code.end(), code.begin(),
-                       [](unsigned char c)
-                       { return std::tolower(c); });
-        auto it = colorCode.find(color);
-        this->playerColor = it->second;
+        {"Rose", "\033[95m"}};
+    std::string code = color;
+    std::transform(code.begin(), code.end(), code.begin(),
+                   [](unsigned char c)
+                   { return std::tolower(c); });
+    auto it = colorCode.find(color);
+    this->playerColor = it->second;
 };
-
 
 std::string Player::getPlayerColor()
 {

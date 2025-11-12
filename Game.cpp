@@ -5,13 +5,14 @@
 #include <string>
 #include <iostream>
 
- Game::Game(std::vector<class Player> players, int numPlayers) :
-    players(players), 
-    size(numPlayers < 5 ? 20 : 30), 
-    board(size) {
-        board.displayBoard();
-        initializeTiles();
-    }
+Game::Game(std::vector<class Player> players, int numPlayers) : players(players),
+                                                                size(numPlayers < 5 ? 20 : 30),
+                                                                board(size)
+{
+    board.displayBoard();
+    initializeTiles();
+    currentRound = 1;
+}
 
 Game::~Game() {}
 
@@ -27,7 +28,7 @@ int Game::getSize()
 
 void Game::initializeTiles()
 {
-    std::vector<std::vector<std::string>> tiles =
+    tiles =
         {
             {"100", "111"},
             {"010", "010", "111"},
@@ -125,6 +126,7 @@ void Game::initializeTiles()
             {"0100", "1111", "1000"},
             {"011", "110", "100", "100"},
             {"01", "11", "10", "11"}};
+
     std::random_device rd;
     std::mt19937 g(rd());
 
@@ -134,4 +136,94 @@ void Game::initializeTiles()
     double ratio = 10.67;
     tilesToPick = static_cast<int>(std::ceil(numPlayers * ratio));
     tiles.resize(tilesToPick);
+}
+
+void Game::runGame()
+{
+    // Game loop implementation goes here
+
+    // doit iterer sur les 9 rounds
+    // et pour chaque round, iterer sur chaque joueur
+
+    // sur chaque tour de joueur :
+    // afficher le board
+    // afficher les tiles disponibles
+    // prompt le joueur d'une rep (ex: si il prend le tile OU si il veut trade)
+    // si trade, gerer le trade
+    // si pick tile, demander au joueur ou il veut poser le tile
+    // verifier si le move est valide
+    // si non, dire que le move n'est pas valide,
+    // si oui, poser le tile sur le board
+    // passer au joueur suivant
+
+    for (int round = 1; round <= 9; ++round)
+    {
+        std::cout << "Round " << round << " begins!" << std::endl;
+        for (auto &player : players)
+        {
+            std::cout << "It's " << player.getPlayerName() << "'s turn." << std::endl;
+            board.displayBoard();
+            if (tiles.empty())
+            {
+                std::cout << "No more tiles available." << std::endl;
+                return;
+            }
+            else
+            {
+                std::cout << "\n Current tile:\n"
+                          << std::endl;
+                int tileSize;
+                tiles[0].size() >> tileSize;
+                for (const std::string &line : tiles[0])
+                {
+                    std::cout << line << std::endl;
+                }
+                std::cout << "\nDo you want to (1) pick this tile or (2) trade? Enter 1 or 2: ";
+                std::string choice;
+                std::cin >> choice;
+                if (choice == "1")
+                {
+                    std::cout << "You chose to pick the tile." << std::endl;
+                    // Here, you would implement logic to place the tile on the board
+                    // For now, we just remove the tile from the available tiles
+                    tiles.erase(tiles.begin());
+                }
+                else if (choice == "2")
+                {
+                    std::cout << "You chose to trade." << std::endl;
+                    std::cout << "Which tile would you like to trade for? (Enter tile index 1 to 5): \n";
+                    for (int i = 0; i < 5; ++i)
+                    {
+                        for (const std::string &line : tiles[i + 1])
+                        {
+                            std::cout << line << std::endl;
+                        }
+                        std::cout << "----\n";
+                    }
+                    // prompt pour le choix de la tile
+                    // implementer la logique de trade ici
+                    // 1 a 5
+                    // si pick 3, push back 1 2, la prochaine tile sera la 4
+                    int tradeChoice;
+                    std::cin >> tradeChoice;
+                    if (tradeChoice >= 1 && tradeChoice <= 5)
+                    {
+                        std::cout << "You traded for tile " << tradeChoice << "." << std::endl;
+                        for (int i = 0; i < tradeChoice; i++)
+                        {
+                            tiles.push_back(tiles[i]);
+                        }
+                    }
+                    else
+                    {
+                        std::cout << "Invalid trade choice. Skipping turn." << std::endl;
+                    }
+                }
+                else
+                {
+                    std::cout << "Invalid choice. Skipping turn." << std::endl;
+                }
+            }
+        }
+    }
 }
