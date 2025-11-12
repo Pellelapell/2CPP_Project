@@ -184,9 +184,6 @@ void Game::runGame()
                 if (choice == "1")
                 {
                     std::cout << "You chose to pick the tile." << std::endl;
-                    // Here, you would implement logic to place the tile on the board
-                    // For now, we just remove the tile from the available tiles
-                    tiles.erase(tiles.begin());
                 }
                 else if (choice == "2")
                 {
@@ -223,6 +220,24 @@ void Game::runGame()
                 else
                 {
                     std::cout << "Invalid choice. Skipping turn." << std::endl;
+                }
+                while (true)
+                {
+                    std::cout << "Where would you like to place the tile? (Enter row and column, e.g., AB): ";
+                    char rowChar, colChar;
+                    std::cin >> rowChar >> colChar;
+                    if (rowChar < 'A' || rowChar >= 'A' + size ||
+                        colChar < 'A' || colChar >= 'A' + size)
+                    {
+                        std::cout << "Invalid position. Retry." << std::endl;
+                        continue;
+                    }
+                    else
+                    {
+                        std::cout << "You chose to place the tile at " << rowChar << " " << colChar << "." << std::endl;
+                        tiles.erase(tiles.begin());
+                        break;
+                    }
                 }
             }
         }
