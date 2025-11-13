@@ -13,13 +13,13 @@ int getNumPlayers()
 
     while (true)
     {
-        std::cout << "Entre le nombre de joueurs" << std::endl;
+        std::cout << "How many players ?" << std::endl;
 
         if (std::cin >> numPlayers && numPlayers >= 2 && numPlayers <= 9)
             return (numPlayers);
         else
         {
-            std::cout << "Nombre de joueur invalide : doit etre entre 2 et 9" << std::endl;
+            std::cout << "Invalid number, pick between 2 and 9." << std::endl;
             std::cin.clear();
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         }
@@ -34,12 +34,12 @@ std::vector<Player> createPlayerList(int numPlayers)
     for (int i = 0; i < numPlayers; ++i)
     {
         Player player;
-        std::cout << "Joueur " << i + 1 << " , entre ton pseudo !" << std::endl;
+        std::cout << "Player " << i + 1 << " , enter your nickname !" << std::endl;
         player.setPlayerId(i + 1);
         std::string playerName;
         std::cin >> playerName;
         player.setPlayerName(playerName);
-        std::cout << "Quelle couleur voudrais-tu ? voici les couleurs disponibles : " << std::endl;
+        std::cout << "Which color would you like ? Here are the available colors : " << std::endl;
         for (int n = 0; n < colors.size(); ++n)
             std::cout << colors[n] << " ";
         std::cout << std::endl;
@@ -48,7 +48,7 @@ std::vector<Player> createPlayerList(int numPlayers)
         std::cin >> playerColor;
         while (std::find(colors.begin(), colors.end(), playerColor) == colors.end())
         {
-            std::cout << "Couleur invalide, choisis-en une autre parmi les couleurs disponibles :" << std::endl;
+            std::cout << "Invalid Color, please choose between available colors :" << std::endl;
             for (int n = 0; n < colors.size(); ++n)
                 std::cout << colors[n] << " ";
             std::cout << std::endl;
