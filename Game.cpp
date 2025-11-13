@@ -220,6 +220,7 @@ void Game::runGame()
                 std::cout << "\nDo you want to (1) pick this tile or (2) trade? Enter 1 or 2: ";
                 std::string choice;
                 std::cin >> choice;
+
                 if (choice == "1")
                 {
                     std::cout << "You chose to pick the tile." << std::endl;
@@ -236,10 +237,6 @@ void Game::runGame()
                         }
                         std::cout << "----\n";
                     }
-                    // prompt pour le choix de la tile
-                    // implementer la logique de trade ici
-                    // 1 a 5
-                    // si pick 3, push back 1 2, la prochaine tile sera la 4
                     int tradeChoice;
                     std::cin >> tradeChoice;
                     if (tradeChoice >= 1 && tradeChoice <= 5)
@@ -258,7 +255,7 @@ void Game::runGame()
                 }
                 else
                 {
-                    std::cout << "Invalid choice. Skipping turn." << std::endl;
+                    std::cout << "Invalid choice or not enough Exchange Coupons. Skipping turn." << std::endl;
                 }
                 while (true)
                 {
@@ -349,7 +346,6 @@ int Game::placeTile(Board &board,
     const int N = board.getSize();
     const int pid = player.getPlayerId();
 
-    // bounds + rectangular rows
     if (startRow < 0 || startCol < 0 || startRow + h > N || startCol + w > N)
         return -1;
     for (const auto &r : tile)
@@ -357,29 +353,25 @@ int Game::placeTile(Board &board,
             return -1;
 
     auto filled = [](char ch)
-    { return ch == '1'; }; // tiles are 0/1
+    { return ch == '1'; };
 
-    // overlap check (blocks stones too, since stones should occupy the cell)
     for (int dy = 0; dy < h; ++dy)
         for (int dx = 0; dx < w; ++dx)
             if (filled(tile[dy][dx]) && board.at(startRow + dy, startCol + dx).used != -1)
                 return -1;
 
-    // helper to know if (ny,nx) is part of this same placement
     auto partOfPlacement = [&](int ny, int nx)
     {
         int ly = ny - startRow, lx = nx - startCol;
         return (0 <= ly && ly < h && 0 <= lx && lx < w && filled(tile[ly][lx]));
     };
 
-    // does player already have any cells on board?
     bool hasAnyOwned = false;
     for (int y = 0; y < N && !hasAnyOwned; ++y)
         for (int x = 0; x < N && !hasAnyOwned; ++x)
             if (board.at(y, x).owner == pid)
                 hasAnyOwned = true;
 
-    // adjacency rule: must touch own (if not first tile), must not touch opponent; stones ignored
     bool touchesOwn = false;
     auto checkNeighbor = [&](int y, int x)
     {
@@ -391,10 +383,9 @@ int Game::placeTile(Board &board,
         if (c.used != -1)
         {
             if (c.owner >= 0 && c.owner != pid)
-                throw 1; // touches opponent -> invalid
+                throw 1;
             if (c.owner == pid)
-                touchesOwn = true; // touches own -> good
-            // owner == -1 (stone) -> ignore for adjacency
+                touchesOwn = true;
         }
     };
 
@@ -413,27 +404,26 @@ int Game::placeTile(Board &board,
     }
     catch (int)
     {
-        return -2; // adjacent to opponent
+        return -2;
     }
 
     if (hasAnyOwned && !touchesOwn)
-        return -3; // must touch own if not first tile
+        return -3;
 
-    // place cells; covering a bonus loses it
     for (int dy = 0; dy < h; ++dy)
         for (int dx = 0; dx < w; ++dx)
             if (filled(tile[dy][dx]))
             {
                 Cell &cell = board.at(startRow + dy, startCol + dx);
                 if (cell.bonus != Bonus::None)
-                    cell.bonus = Bonus::None; // covered -> lost
-                cell.used = 1;                // or currentRound if you track it
+                    cell.bonus = Bonus::None;
+                cell.used = 1;
                 cell.owner = pid;
                 cell.color = player.getPlayerColor();
                 cell.symbol = symbol;
             }
 
-    return 0; // success
+    return 0;
 }
 
 #include <vector>
@@ -514,7 +504,6 @@ bool Game::isCapturedBy(int pid, int r, int c)
     {
         return y >= 0 && y < N && x >= 0 && x < N && board.at(y, x).owner == pid;
     };
-    // Bonus captured if surrounded on N/E/S/W by the same player
     return own(r - 1, c) && own(r + 1, c) && own(r, c - 1) && own(r, c + 1);
 }
 
@@ -534,12 +523,11 @@ void Game::resolveBonusesAfterPlacement(const Player &player, const std::string 
             if (isCapturedBy(pid, r, c))
             {
                 Bonus b = cell.bonus;
-                // Convert the bonus cell to this player's territory
                 cell.bonus = Bonus::None;
                 cell.owner = pid;
-                cell.used = 1; // or currentRound if you track it
+                cell.used = 1;
                 cell.color = player.getPlayerColor();
-                cell.symbol = "*"; // visual mark for captured bonus
+                cell.symbol = "*";
 
                 applyCapturedBonus(player, r, c, b, symbol);
             }
@@ -617,9 +605,8 @@ void Game::placeStoneImmediate(int pid)
             continue;
         }
 
-        // Mark stone: blocked, no owner
-        cell.used = -2;  // any non -1 so placement rejects it
-        cell.owner = -1; // special: not a player
+        cell.used = -2;
+        cell.owner = -1;
         cell.color = "\033[90m";
         cell.symbol = "O";
         std::cout << "Stone placed at " << (char)std::toupper(rr) << (char)std::toupper(cc) << ".\n";
@@ -688,11 +675,9 @@ void Game::captureTileFlood(const Player &player, int startR, int startC, const 
         q.pop();
         Cell &cell = board.at(r, c);
 
-        // Switch ownership/color and re-symbol to current round letter
         cell.owner = pid;
         cell.color = player.getPlayerColor();
         cell.symbol = newSymbol;
-        // keep cell.used as-is (already occupied)
 
         static const int dr[4] = {-1, 1, 0, 0};
         static const int dc[4] = {0, 0, -1, 1};
@@ -704,8 +689,7 @@ void Game::captureTileFlood(const Player &player, int startR, int startC, const 
 
             const Cell &nb = board.at(nr, nc);
             if (nb.used == -2)
-                continue; // ignore stones
-            // Same tile: placed, same previous owner, same symbol
+                continue;
             if (nb.used != -1 && nb.owner == prevOwner && nb.symbol == sym)
             {
                 vis[nr][nc] = 1;
