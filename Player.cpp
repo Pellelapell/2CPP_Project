@@ -6,7 +6,7 @@
 void Player::setPlayerName(std::string name)
 {
     this->playerName = name;
-    exchangesCoupon = 55;
+    exchangesCoupon = 1;
 }
 
 void Player::setPlayerId(int playerId)
@@ -34,4 +34,3 @@ void Player::setPlayerColor(std::string color)
     auto it = colorCode.find(color);
     this->playerColor = it->second;
 };
-

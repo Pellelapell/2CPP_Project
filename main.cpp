@@ -26,7 +26,6 @@ int getNumPlayers()
     }
 }
 
-// Look pour tolower les colors
 std::vector<Player> createPlayerList(int numPlayers)
 {
     std::vector<Player> playerList;

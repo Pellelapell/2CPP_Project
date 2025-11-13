@@ -39,4 +39,5 @@ class Game
 
 
         bool parseCoord2(const char rr, const char cc, int& r, int& c);
+        void redeemExchangeCoupon();
 };

@@ -165,7 +165,7 @@ void Game::initializeTiles()
 void Game::runGame()
 {
 
-    for (int round = 1; round <= 4; ++round)
+    for (int round = 1; round <= 9; ++round)
     {
         std::cout << "Round " << round << " begins!" << std::endl;
         char symbol = 'A' + round - 1;
@@ -179,27 +179,32 @@ void Game::runGame()
                 std::cout << "No more tiles available." << std::endl;
                 return;
             }
-            if (round == 1) {
-                while (true) {
-                std::vector<std::string> oneByOne = {"1"};
-                std::string symbol(1, player.getPlayerId() + '0');
+            if (round == 1)
+            {
+                while (true)
+                {
+                    std::vector<std::string> oneByOne = {"1"};
+                    std::string symbol(1, player.getPlayerId() + '0');
 
-                char rowChar, colChar;
-                std::cout << "Round 1: place your 1x1 tile (e.g. A,C): ";
-                std::cin >> rowChar >> colChar;
+                    char rowChar, colChar;
+                    std::cout << "Round 1: place your 1x1 tile (e.g. A,C): ";
+                    std::cin >> rowChar >> colChar;
 
-                int row = std::toupper(rowChar) - 'A';
-                int col = std::toupper(colChar) - 'A';
+                    int row = std::toupper(rowChar) - 'A';
+                    int col = std::toupper(colChar) - 'A';
 
-                int result = placeTile(board, oneByOne, row, col, player, symbol);
-                if (result != 0) {
-                    std::cout << "Invalid placement, retry.\n";
-                    continue;
-                } else {
-                    std::cout << "Tile placed!\n";
-                    resolveBonusesAfterPlacement(player, symbolStr);
-                    break;
-                }
+                    int result = placeTile(board, oneByOne, row, col, player, symbol);
+                    if (result != 0)
+                    {
+                        std::cout << "Invalid placement, retry.\n";
+                        continue;
+                    }
+                    else
+                    {
+                        std::cout << "Tile placed!\n";
+                        resolveBonusesAfterPlacement(player, symbolStr);
+                        break;
+                    }
                 }
             }
             else
@@ -291,7 +296,6 @@ void Game::runGame()
                     {
                         std::cout << "Invalid action. Please enter F, R, or P." << std::endl;
                     }
-
                 }
 
                 while (true)
@@ -314,7 +318,8 @@ void Game::runGame()
                             std::cout << "Invalid placement. Retry." << std::endl;
                             continue;
                         }
-                        else {
+                        else
+                        {
                             resolveBonusesAfterPlacement(player, symbolStr);
                             tiles.erase(tiles.begin());
                             break;
@@ -325,23 +330,19 @@ void Game::runGame()
         }
     }
 
+    redeemExchangeCoupon();
 
-    // Last Tile for Coupon
-    
-
-    // End of game logic
     checkForWinner();
-
-
 }
 
-int Game::placeTile(Board& board,
-                    const std::vector<std::string>& tile,
+int Game::placeTile(Board &board,
+                    const std::vector<std::string> &tile,
                     int startRow, int startCol,
-                    const Player& player,
+                    const Player &player,
                     std::string symbol)
 {
-    if (tile.empty()) return -1;
+    if (tile.empty())
+        return -1;
 
     const int h = (int)tile.size();
     const int w = (int)tile[0].size();
@@ -349,10 +350,14 @@ int Game::placeTile(Board& board,
     const int pid = player.getPlayerId();
 
     // bounds + rectangular rows
-    if (startRow < 0 || startCol < 0 || startRow + h > N || startCol + w > N) return -1;
-    for (const auto& r : tile) if ((int)r.size() != w) return -1;
+    if (startRow < 0 || startCol < 0 || startRow + h > N || startCol + w > N)
+        return -1;
+    for (const auto &r : tile)
+        if ((int)r.size() != w)
+            return -1;
 
-    auto filled = [](char ch){ return ch == '1'; }; // tiles are 0/1
+    auto filled = [](char ch)
+    { return ch == '1'; }; // tiles are 0/1
 
     // overlap check (blocks stones too, since stones should occupy the cell)
     for (int dy = 0; dy < h; ++dy)
@@ -361,7 +366,8 @@ int Game::placeTile(Board& board,
                 return -1;
 
     // helper to know if (ny,nx) is part of this same placement
-    auto partOfPlacement = [&](int ny, int nx){
+    auto partOfPlacement = [&](int ny, int nx)
+    {
         int ly = ny - startRow, lx = nx - startCol;
         return (0 <= ly && ly < h && 0 <= lx && lx < w && filled(tile[ly][lx]));
     };
@@ -370,69 +376,86 @@ int Game::placeTile(Board& board,
     bool hasAnyOwned = false;
     for (int y = 0; y < N && !hasAnyOwned; ++y)
         for (int x = 0; x < N && !hasAnyOwned; ++x)
-            if (board.at(y,x).owner == pid) hasAnyOwned = true;
+            if (board.at(y, x).owner == pid)
+                hasAnyOwned = true;
 
     // adjacency rule: must touch own (if not first tile), must not touch opponent; stones ignored
     bool touchesOwn = false;
-    auto checkNeighbor = [&](int y,int x){
-        if (y < 0 || y >= N || x < 0 || x >= N) return;
-        if (partOfPlacement(y,x)) return;
-        const Cell& c = board.at(y,x);
-        if (c.used != -1) {
-            if (c.owner >= 0 && c.owner != pid) throw 1; // touches opponent -> invalid
-            if (c.owner == pid) touchesOwn = true;       // touches own -> good
+    auto checkNeighbor = [&](int y, int x)
+    {
+        if (y < 0 || y >= N || x < 0 || x >= N)
+            return;
+        if (partOfPlacement(y, x))
+            return;
+        const Cell &c = board.at(y, x);
+        if (c.used != -1)
+        {
+            if (c.owner >= 0 && c.owner != pid)
+                throw 1; // touches opponent -> invalid
+            if (c.owner == pid)
+                touchesOwn = true; // touches own -> good
             // owner == -1 (stone) -> ignore for adjacency
         }
     };
 
-    try {
+    try
+    {
         for (int dy = 0; dy < h; ++dy)
             for (int dx = 0; dx < w; ++dx)
-                if (filled(tile[dy][dx])) {
+                if (filled(tile[dy][dx]))
+                {
                     int y = startRow + dy, x = startCol + dx;
-                    checkNeighbor(y-1, x);
-                    checkNeighbor(y+1, x);
-                    checkNeighbor(y, x-1);
-                    checkNeighbor(y, x+1);
+                    checkNeighbor(y - 1, x);
+                    checkNeighbor(y + 1, x);
+                    checkNeighbor(y, x - 1);
+                    checkNeighbor(y, x + 1);
                 }
-    } catch (int) {
+    }
+    catch (int)
+    {
         return -2; // adjacent to opponent
     }
 
-    if (hasAnyOwned && !touchesOwn) return -3; // must touch own if not first tile
+    if (hasAnyOwned && !touchesOwn)
+        return -3; // must touch own if not first tile
 
     // place cells; covering a bonus loses it
     for (int dy = 0; dy < h; ++dy)
         for (int dx = 0; dx < w; ++dx)
-            if (filled(tile[dy][dx])) {
-                Cell& cell = board.at(startRow + dy, startCol + dx);
-                if (cell.bonus != Bonus::None) cell.bonus = Bonus::None; // covered -> lost
-                cell.used   = 1;                 // or currentRound if you track it
-                cell.owner  = pid;
-                cell.color  = player.getPlayerColor();
+            if (filled(tile[dy][dx]))
+            {
+                Cell &cell = board.at(startRow + dy, startCol + dx);
+                if (cell.bonus != Bonus::None)
+                    cell.bonus = Bonus::None; // covered -> lost
+                cell.used = 1;                // or currentRound if you track it
+                cell.owner = pid;
+                cell.color = player.getPlayerColor();
                 cell.symbol = symbol;
             }
 
     return 0; // success
 }
 
-
 #include <vector>
 #include <iostream>
 #include <algorithm>
-
-// Finds the largest contiguous square for a given player
-int Game::largestSquareForPlayer(Board& board, int playerId) {
+int Game::largestSquareForPlayer(Board &board, int playerId)
+{
     int N = board.getSize();
     std::vector<int> prev(N + 1, 0), cur(N + 1, 0);
     int best = 0;
 
-    for (int y = 1; y <= N; ++y) {
-        for (int x = 1; x <= N; ++x) {
-            if (board.at(y - 1, x - 1).owner == playerId) {
-                cur[x] = 1 + std::min({ prev[x], cur[x - 1], prev[x - 1] });
+    for (int y = 1; y <= N; ++y)
+    {
+        for (int x = 1; x <= N; ++x)
+        {
+            if (board.at(y - 1, x - 1).owner == playerId)
+            {
+                cur[x] = 1 + std::min({prev[x], cur[x - 1], prev[x - 1]});
                 best = std::max(best, cur[x]);
-            } else {
+            }
+            else
+            {
                 cur[x] = 0;
             }
         }
@@ -443,19 +466,23 @@ int Game::largestSquareForPlayer(Board& board, int playerId) {
     return best;
 }
 
-// Main winner check
-void Game::checkForWinner() {
+void Game::checkForWinner()
+{
     int bestSize = 0;
     int winnerId = -1;
     bool tie = false;
 
-    for (size_t i = 0; i < players.size(); ++i) {
+    for (size_t i = 0; i < players.size(); ++i)
+    {
         int size = largestSquareForPlayer(board, players[i].getPlayerId());
-        if (size > bestSize) {
+        if (size > bestSize)
+        {
             bestSize = size;
             winnerId = (int)i;
             tie = false;
-        } else if (size == bestSize && size > 0) {
+        }
+        else if (size == bestSize && size > 0)
+        {
             tie = true;
         }
     }
@@ -463,11 +490,16 @@ void Game::checkForWinner() {
     std::cout << "\n=== GAME OVER ===\n";
     board.displayBoard();
 
-    if (bestSize == 0) {
+    if (bestSize == 0)
+    {
         std::cout << "No valid square formed. It's a draw!\n";
-    } else if (tie) {
+    }
+    else if (tie)
+    {
         std::cout << "It's a tie! Both players have a square of size " << bestSize << ".\n";
-    } else {
+    }
+    else
+    {
         std::cout << "Winner: " << players[winnerId].getPlayerName()
                   << " with a " << bestSize << "x" << bestSize << " square!\n";
     }
@@ -475,32 +507,38 @@ void Game::checkForWinner() {
     std::exit(0);
 }
 
-bool Game::isCapturedBy(int pid, int r, int c) {
+bool Game::isCapturedBy(int pid, int r, int c)
+{
     const int N = board.getSize();
-    auto own = [&](int y,int x){
-        return y>=0 && y<N && x>=0 && x<N && board.at(y,x).owner == pid;
+    auto own = [&](int y, int x)
+    {
+        return y >= 0 && y < N && x >= 0 && x < N && board.at(y, x).owner == pid;
     };
     // Bonus captured if surrounded on N/E/S/W by the same player
-    return own(r-1,c) && own(r+1,c) && own(r,c-1) && own(r,c+1);
+    return own(r - 1, c) && own(r + 1, c) && own(r, c - 1) && own(r, c + 1);
 }
 
-
-void Game::resolveBonusesAfterPlacement(const Player& player, const std::string& symbol) {
+void Game::resolveBonusesAfterPlacement(const Player &player, const std::string &symbol)
+{
     const int pid = player.getPlayerId();
     const int N = board.getSize();
 
-    for (int r = 0; r < N; ++r) {
-        for (int c = 0; c < N; ++c) {
-            Cell& cell = board.at(r,c);
-            if (cell.bonus == Bonus::None) continue;
+    for (int r = 0; r < N; ++r)
+    {
+        for (int c = 0; c < N; ++c)
+        {
+            Cell &cell = board.at(r, c);
+            if (cell.bonus == Bonus::None)
+                continue;
 
-            if (isCapturedBy(pid, r, c)) {
+            if (isCapturedBy(pid, r, c))
+            {
                 Bonus b = cell.bonus;
                 // Convert the bonus cell to this player's territory
-                cell.bonus  = Bonus::None;
-                cell.owner  = pid;
-                cell.used   = 1; // or currentRound if you track it
-                cell.color  = player.getPlayerColor();
+                cell.bonus = Bonus::None;
+                cell.owner = pid;
+                cell.used = 1; // or currentRound if you track it
+                cell.color = player.getPlayerColor();
                 cell.symbol = "*"; // visual mark for captured bonus
 
                 applyCapturedBonus(player, r, c, b, symbol);
@@ -509,94 +547,119 @@ void Game::resolveBonusesAfterPlacement(const Player& player, const std::string&
     }
 }
 
-
-void Game::applyCapturedBonus(const Player& player, int /*r*/, int /*c*/, Bonus b, const std::string& symbol) {
+void Game::applyCapturedBonus(const Player &player, int /*r*/, int /*c*/, Bonus b, const std::string &symbol)
+{
     const int pid = player.getPlayerId();
 
-    switch (b) {
-        case Bonus::Exchange:
-            if ((int)exchangeCoupons.size() <= pid) exchangeCoupons.resize(pid+1, 0);
-            exchangeCoupons[pid] += 1;
-            std::cout << player.getPlayerName()
-                      << " captured an Exchange bonus (+1 coupon, now "
-                      << exchangeCoupons[pid] << ").\n";
-            break;
+    switch (b)
+    {
+    case Bonus::Exchange:
+        if ((int)exchangeCoupons.size() <= pid)
+            exchangeCoupons.resize(pid + 1, 0);
+        exchangeCoupons[pid] += 1;
+        std::cout << player.getPlayerName()
+                  << " captured an Exchange bonus (+1 coupon, now "
+                  << exchangeCoupons[pid] << ").\n";
+        break;
 
-        case Bonus::Stone:
-            std::cout << player.getPlayerName()
-                      << " captured a Stone bonus — place a stone now.\n";
-            placeStoneImmediate(pid);  // must be used immediately
-            break;
+    case Bonus::Stone:
+        std::cout << player.getPlayerName()
+                  << " captured a Stone bonus — place a stone now.\n";
+        placeStoneImmediate(pid);
+        break;
 
-        case Bonus::Robbery:
-            std::cout << player.getPlayerName()
-                      << " captured a Robbery bonus — resolve now.\n";
-            doRobberyImmediate(player, symbol); // must be used immediately
-            break;
+    case Bonus::Robbery:
+        std::cout << player.getPlayerName()
+                  << " captured a Robbery bonus — resolve now.\n";
+        doRobberyImmediate(player, symbol);
+        break;
 
-        default: break;
+    default:
+        break;
     }
 }
-
-
 
 #include <queue>
 #include <cctype>
 
-// Parse “row,col” letters (already read as two chars)
-bool Game::parseCoord2(const char rr, const char cc, int& r, int& c) {
+bool Game::parseCoord2(const char rr, const char cc, int &r, int &c)
+{
     r = std::toupper(rr) - 'A';
     c = std::toupper(cc) - 'A';
     int N = board.getSize();
     return (r >= 0 && r < N && c >= 0 && c < N);
 }
 
-/* ===================== STONE (immediate) ===================== */
-void Game::placeStoneImmediate(int pid) {
+void Game::placeStoneImmediate(int pid)
+{
     const int N = board.getSize();
-    while (true) {
+    while (true)
+    {
         std::cout << "Place your stone (e.g., AC): ";
         char rr, cc;
-        if (!(std::cin >> rr >> cc)) { std::cin.clear(); continue; }
+        if (!(std::cin >> rr >> cc))
+        {
+            std::cin.clear();
+            continue;
+        }
 
         int r, c;
-        if (!parseCoord2(rr, cc, r, c)) { std::cout << "Out of bounds.\n"; continue; }
+        if (!parseCoord2(rr, cc, r, c))
+        {
+            std::cout << "Out of bounds.\n";
+            continue;
+        }
 
-        Cell& cell = board.at(r, c);
-        if (cell.used != -1) { std::cout << "Cell not empty.\n"; continue; }
+        Cell &cell = board.at(r, c);
+        if (cell.used != -1)
+        {
+            std::cout << "Cell not empty.\n";
+            continue;
+        }
 
         // Mark stone: blocked, no owner
-        cell.used   = -2;                 // any non -1 so placement rejects it
-        cell.owner  = -1;                 // special: not a player
-        cell.color  = "\033[90m";
+        cell.used = -2;  // any non -1 so placement rejects it
+        cell.owner = -1; // special: not a player
+        cell.color = "\033[90m";
         cell.symbol = "O";
         std::cout << "Stone placed at " << (char)std::toupper(rr) << (char)std::toupper(cc) << ".\n";
         break;
     }
 }
 
-/* ============= ROBBERY (immediate, capture a tile) ============ */
-/*
-   Player chooses an enemy cell. We capture the WHOLE tile by
-   flood-filling 4-connected cells that have:
-   - same previous owner
-   - same symbol (your tiles use round letters, so a whole tile shares it)
-*/
-void Game::doRobberyImmediate(const Player& player, const std::string& newSymbol) {
+void Game::doRobberyImmediate(const Player &player, const std::string &newSymbol)
+{
     const int N = board.getSize();
     const int pid = player.getPlayerId();
 
-    while (true) {
+    while (true)
+    {
         std::cout << "Robbery: pick an enemy tile (enter a cell on it, e.g., AC): ";
         char rr, cc;
-        if (!(std::cin >> rr >> cc)) { std::cin.clear(); continue; }
+        if (!(std::cin >> rr >> cc))
+        {
+            std::cin.clear();
+            continue;
+        }
 
         int r, c;
-        if (!parseCoord2(rr, cc, r, c)) { std::cout << "Out of bounds.\n"; continue; }
+        if (!parseCoord2(rr, cc, r, c))
+        {
+            std::cout << "Out of bounds.\n";
+            continue;
+        }
 
-        const Cell& chosen = board.at(r, c);
-        if (chosen.used == -1 || chosen.owner == -1) { std::cout << "Not a placed tile.\n"; continue; }
-        if (chosen.owner == pid) { std::cout << "That’s already yours.\n"; continue; }
+        const Cell &chosen = board.at(r, c);
+        if (chosen.used == -1 || chosen.owner == -1)
+        {
+            std::cout << "Not a placed tile.\n";
+            continue;
+        }
+        if (chosen.owner == pid)
+        {
+            std::cout << "That’s already yours.\n";
+            continue;
+        }
 
         captureTileFlood(player, r, c, newSymbol);
         std::cout << "Robbery successful at " << (char)std::toupper(rr) << (char)std::toupper(cc) << ".\n";
@@ -604,47 +667,119 @@ void Game::doRobberyImmediate(const Player& player, const std::string& newSymbol
     }
 }
 
-
-
-void Game::captureTileFlood(const Player& player, int startR, int startC, const std::string& newSymbol) {
-    const int N   = board.getSize();
+void Game::captureTileFlood(const Player &player, int startR, int startC, const std::string &newSymbol)
+{
+    const int N = board.getSize();
     const int pid = player.getPlayerId();
     const int prevOwner = board.at(startR, startC).owner;
     const std::string sym = board.at(startR, startC).symbol;
 
-    std::queue<std::pair<int,int>> q;
+    std::queue<std::pair<int, int>> q;
     std::vector<std::vector<char>> vis(N, std::vector<char>(N, 0));
-    auto inb = [&](int y,int x){ return y>=0 && y<N && x>=0 && x<N; };
+    auto inb = [&](int y, int x)
+    { return y >= 0 && y < N && x >= 0 && x < N; };
 
     q.push({startR, startC});
     vis[startR][startC] = 1;
 
-    while (!q.empty()) {
-        auto [r,c] = q.front(); q.pop();
-        Cell& cell = board.at(r,c);
+    while (!q.empty())
+    {
+        auto [r, c] = q.front();
+        q.pop();
+        Cell &cell = board.at(r, c);
 
         // Switch ownership/color and re-symbol to current round letter
-        cell.owner  = pid;
-        cell.color  = player.getPlayerColor();
+        cell.owner = pid;
+        cell.color = player.getPlayerColor();
         cell.symbol = newSymbol;
         // keep cell.used as-is (already occupied)
 
         static const int dr[4] = {-1, 1, 0, 0};
-        static const int dc[4] = { 0, 0,-1, 1};
-        for (int k = 0; k < 4; ++k) {
+        static const int dc[4] = {0, 0, -1, 1};
+        for (int k = 0; k < 4; ++k)
+        {
             int nr = r + dr[k], nc = c + dc[k];
-            if (!inb(nr,nc) || vis[nr][nc]) continue;
+            if (!inb(nr, nc) || vis[nr][nc])
+                continue;
 
-            const Cell& nb = board.at(nr,nc);
-            if (nb.used == -2) continue; // ignore stones
+            const Cell &nb = board.at(nr, nc);
+            if (nb.used == -2)
+                continue; // ignore stones
             // Same tile: placed, same previous owner, same symbol
-            if (nb.used != -1 && nb.owner == prevOwner && nb.symbol == sym) {
+            if (nb.used != -1 && nb.owner == prevOwner && nb.symbol == sym)
+            {
                 vis[nr][nc] = 1;
-                q.push({nr,nc});
+                q.push({nr, nc});
             }
         }
     }
 }
 
+void Game::redeemExchangeCoupon()
+{
+    const int N = board.getSize();
 
+    for (const auto &p : players)
+    {
+        int pid = p.getPlayerId();
+        if ((int)exchangeCoupons.size() <= pid)
+            exchangeCoupons.resize(pid + 1, 0);
+    }
 
+    std::cout << "\n=== Exchange Coupon End Phase ===\n";
+    for (const auto &player : players)
+    {
+        const int pid = player.getPlayerId();
+        int &coupons = exchangeCoupons[pid];
+        coupons = 1;
+        while (coupons > 0)
+        {
+            board.displayBoard();
+            std::cout << player.getPlayerName() << " has " << coupons
+                      << " coupon(s). Place a 1x1 tile? (y/n): ";
+            char yn;
+            if (!(std::cin >> yn))
+            {
+                std::cin.clear();
+                continue;
+            }
+            if (yn != 'y' && yn != 'Y')
+                break;
+
+            while (true)
+            {
+                std::cout << "Enter position (e.g., AC): ";
+                char rr, cc;
+                if (!(std::cin >> rr >> cc))
+                {
+                    std::cin.clear();
+                    continue;
+                }
+                int r = std::toupper(rr) - 'A';
+                int c = std::toupper(cc) - 'A';
+                if (r < 0 || r >= N || c < 0 || c >= N)
+                {
+                    std::cout << "Out of bounds.\n";
+                    continue;
+                }
+
+                Cell &cell = board.at(r, c);
+                if (cell.used != -1)
+                {
+                    std::cout << "Cell not empty.\n";
+                    continue;
+                }
+
+                cell.used = 1;
+                cell.owner = pid;
+                cell.color = player.getPlayerColor();
+                cell.symbol = "+";
+                std::cout << "Placed at " << (char)std::toupper(rr) << (char)std::toupper(cc) << ".\n";
+                break;
+            }
+
+            --coupons;
+        }
+    }
+    std::cout << "=== End Phase Completed ===\n";
+}

@@ -11,7 +11,7 @@ Board::Board(int size) : size(size), grid(size * size)
 void Board::displayBoard()
 {
     const char* RESET = "\033[0m";
-    const char* GRAY  = "\033[90m"; // for bonus markers
+    const char* GRAY  = "\033[90m"; 
 
     std::cout << "Board Size: " << size << "x" << size << "\n  ";
     for (int j = 0; j < size; ++j)
@@ -26,10 +26,8 @@ void Board::displayBoard()
             const Cell& c = at(i, j);
 
             if (c.used != -1) {
-                // Occupied: show colored symbol
                 std::cout << c.color << c.symbol << ' ' << RESET;
             } else {
-                // Empty: show bonus if any, else '.'
                 char mark = '.';
                 switch (c.bonus) {
                     case Bonus::Exchange: mark = 'E'; break;
@@ -56,16 +54,14 @@ void Board::seedBonuses(int numPlayers, std::mt19937& rng) {
     auto needRobbery  = numPlayers;
 
     auto tryPlace = [&](Bonus b)->bool {
-        if (size < 3) return false; // no interior cell exists
-        std::uniform_int_distribution<int> dist(1, size - 2); // avoid edges
+        if (size < 3) return false;
+        std::uniform_int_distribution<int> dist(1, size - 2); 
         for (int attempts = 0; attempts < 5000; ++attempts) {
             int y = dist(rng), x = dist(rng);
 
-            // cell must be empty and not already a bonus
             Cell& c = at(y, x);
             if (c.used != -1 || c.bonus != Bonus::None) continue;
 
-            // no adjacent (8-neighborhood) bonus
             bool ok = true;
             for (int dy = -1; dy <= 1 && ok; ++dy)
                 for (int dx = -1; dx <= 1 && ok; ++dx) {
