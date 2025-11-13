@@ -36,6 +36,7 @@ std::vector<Player> createPlayerList(int numPlayers)
     {
         Player player;
         std::cout << "Joueur " << i + 1 << " , entre ton pseudo !" << std::endl;
+        player.setPlayerId(i + 1);
         std::string playerName;
         std::cin >> playerName;
         player.setPlayerName(playerName);
@@ -57,7 +58,7 @@ std::vector<Player> createPlayerList(int numPlayers)
         std::vector<std::string>::iterator it = std::find(colors.begin(), colors.end(), playerColor);
         colors.erase(it);
         player.setPlayerColor(playerColor);
-        std::cout << player.getPlayerColor() << ' ' << player.getPlayerName() << std::endl;
+        std::cout << player.getPlayerId() << player.getPlayerColor() << ' ' << player.getPlayerName() << "\033[37m" << std::endl;
         playerList.push_back(player);
     }
     return playerList;

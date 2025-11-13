@@ -21,8 +21,8 @@ class Game
         int getSize();
         
         void initializeTiles();
-        int placeTile(std::vector<std::vector<std::string>> board, std::vector<std::string> tile,
-                int row, int col, std::string color, std::string symbol);
+        int placeTile(Board& board, const std::vector<std::string>& tile, int startRow, int startCol, const Player& player, std::string symbol);
+
 
         void runGame();
 };

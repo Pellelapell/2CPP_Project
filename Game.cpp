@@ -165,6 +165,8 @@ void Game::runGame()
     for (int round = 1; round <= 9; ++round)
     {
         std::cout << "Round " << round << " begins!" << std::endl;
+        char symbol = 'A' + round - 1;
+        std::string symbolStr(1, symbol);
         for (auto &player : players)
         {
             std::cout << "It's " << player.getPlayerName() << "'s turn." << std::endl;
@@ -173,6 +175,28 @@ void Game::runGame()
             {
                 std::cout << "No more tiles available." << std::endl;
                 return;
+            }
+            if (round == 1) {
+                while (true) {
+                std::vector<std::string> oneByOne = {"1"};
+                std::string symbol(1, player.getPlayerId() + '0');
+
+                char rowChar, colChar;
+                std::cout << "Round 1: place your 1x1 tile (e.g. A,C): ";
+                std::cin >> rowChar >> colChar;
+
+                int row = std::toupper(rowChar) - 'A';
+                int col = std::toupper(colChar) - 'A';
+
+                int result = placeTile(board, oneByOne, row, col, player, symbol);
+                if (result != 0) {
+                    std::cout << "Invalid placement, retry.\n";
+                    continue;
+                } else {
+                    std::cout << "Tile placed!\n";
+                    break;
+                }
+                }
             }
             else
             {
@@ -280,11 +304,96 @@ void Game::runGame()
                     else
                     {
                         std::cout << "You chose to place the tile at " << rowChar << " " << colChar << "." << std::endl;
-                        tiles.erase(tiles.begin());
-                        break;
+                        int result = placeTile(board, tiles[0], rowChar - 'A', colChar - 'A', player, symbolStr);
+                        if (result != 0)
+                        {
+                            std::cout << "Invalid placement. Retry." << std::endl;
+                            continue;
+                        }
+                        else {
+                            tiles.erase(tiles.begin());
+                            break;
+                        }
                     }
                 }
             }
         }
     }
+
+    // End of game logic
+
+    
+}
+
+int Game::placeTile(Board& board,
+                    const std::vector<std::string>& tile,
+                    int startRow, int startCol,
+                    const Player& player,
+                    std::string symbol)
+{
+    if (tile.empty()) return -1;
+
+    const int h = (int)tile.size();
+    const int w = (int)tile[0].size();
+    const int N = board.getSize();
+    const int pid = player.getPlayerId();
+
+    if (startRow < 0 || startCol < 0 || startRow + h > N || startCol + w > N) return -1;
+    for (const auto& r : tile) if ((int)r.size() != w) return -1;
+
+    auto filled = [](char ch){ return ch == '1'; };
+
+    for (int dy = 0; dy < h; ++dy)
+        for (int dx = 0; dx < w; ++dx)
+            if (filled(tile[dy][dx]) && board.at(startRow + dy, startCol + dx).used != -1)
+                return -1;
+
+    auto partOfPlacement = [&](int ny, int nx){
+        int ly = ny - startRow, lx = nx - startCol;
+        return (0 <= ly && ly < h && 0 <= lx && lx < w && filled(tile[ly][lx]));
+    };
+
+    bool hasAnyOwned = false;
+    for (int y = 0; y < N && !hasAnyOwned; ++y)
+        for (int x = 0; x < N && !hasAnyOwned; ++x)
+            if (board.at(y,x).owner == pid) hasAnyOwned = true;
+
+    bool touchesOwn = false;
+    auto checkNeighbor = [&](int y,int x){
+        if (y < 0 || y >= N || x < 0 || x >= N) return;
+        if (partOfPlacement(y,x)) return;
+        const Cell& c = board.at(y,x);
+        if (c.used != -1) {
+            if (c.owner != pid) throw 1;
+            touchesOwn = true;
+        }
+    };
+
+    try {
+        for (int dy = 0; dy < h; ++dy)
+            for (int dx = 0; dx < w; ++dx)
+                if (filled(tile[dy][dx])) {
+                    int y = startRow + dy, x = startCol + dx;
+                    checkNeighbor(y-1, x);
+                    checkNeighbor(y+1, x);
+                    checkNeighbor(y, x-1);
+                    checkNeighbor(y, x+1);
+                }
+    } catch (int) {
+        return -2;
+    }
+
+    if (hasAnyOwned && !touchesOwn) return -3;
+
+    for (int dy = 0; dy < h; ++dy)
+        for (int dx = 0; dx < w; ++dx)
+            if (filled(tile[dy][dx])) {
+                Cell& cell = board.at(startRow + dy, startCol + dx);
+                cell.used   = 1;
+                cell.owner  = pid;
+                cell.color  = player.getPlayerColor();
+                cell.symbol = symbol;
+            }
+
+    return 0;
 }

@@ -19,6 +19,10 @@ public:
     Board();
     Board(int size);
     
+    int getSize() {
+        return size;
+    }
+
     Cell& at(int row, int col) {
         return grid[row * size + col];
     }
