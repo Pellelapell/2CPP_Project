@@ -6,7 +6,7 @@
 void Player::setPlayerName(std::string name)
 {
     this->playerName = name;
-    exchangesCoupon = 1;
+    exchangesCoupon = 55;
 }
 
 void Player::setPlayerId(int playerId)
